@@ -6,43 +6,13 @@ Bruno Leite's tutorial,
 His post is
 [here](https://developer.okta.com/blog/2020/07/27/spring-boot-using-java-modules#create-the-persistence-module).
 
-The following are my notes as I work my way through the tutorial.
+My lessons learned about directory and POM structure are [here](https://jimstockwell.dev/2020/11/19/Java-Module-File-And-POM-Structure.html).
 
-## Directory Structure
+Lessons learned about Spring Boot are below.
 
-The first step in Bruno's tutorial is to
-(manually) set up the directory structure and Maven pom files.
+## Persistence Module With Spring Boot
 
-I expected to find rather long,
-reverse domain name format, module names.
-But not so.  The modules are named simply application,
-and persistence.  (I wonder if this would cause trouble if we tried to integrate this project with other projects.)
-
-## Pom Files
-
-The pom file in the top level directory
-contains a "modules" section.
-This is a list of other "modules" to build.
-Those modules have separate pom files that control them.
-The text between the "module" tags is the
-relative path of the
-module directory or pom file.
-Bruno chose to reference the directories
-rather than the pom files.
-
-The pom files also contain "parent" tags.
-They look like they could almost be back-links
-for module tags, but actually, they serve a different purpose.
-The "parent" tags specify where a pom file gets default settings from.
-
-## Directory and Pom File Checkpoint
-
-At this point, with the directory structure in place,
-and the pom files made, we can compile, with `mvn compile`.
-
-(There is nothing to compile, but that just makes the compile cycle all the faster!)
-
-## First pass at persistence module
+Wow! Spring Boot and Docker made using a MongoDB shockingly easy.
 
 The persistence module isn't really a module after just the first steps of Bruno's tutorial.
 The plan is to create the persistence module as just another package,
@@ -54,21 +24,24 @@ In the persistence "module", Bruno creates three interfaces or classes.
   - Bird has one private member annotated @Id.
     It's interesting that either the example is poor,
     or Spring is clever enough to infer what setter and getter matches the member marked with @Id.
-- BirdRepository, an interface to classes that can store Bird objects.
+- BirdRepository,
+  an interface to the MongoDB for storing specifically Bird objects.
   - It is a very simply declared interface.
     It just extends MongoRepository by specifying the class to store (Bird) and the key type (String).
 - BirdPersistence, which handles persisting and restoring Birds.
   It also populates our database with an initial sample entry.
-  - The class is annotated with @Component so that it can be
-    auto-detected in annotation based configuration,
-    becoming controlled by an ApplicationContext container.
-    This makes the BirdPersistence class a "Spring Bean".
-  - The class constructor is annotated with @Autowired
-    so that the member field birdRepository
-    will get set with a nicely instantiated BirdRepository.
-    (Note that per [this Spring documentation](https://docs.spring.io/spring-framework/docs/4.3.x/spring-framework-reference/htmlsingle/#beans-autowired-annotation),
-    @Autowired is not really necessary in this case
-    as there is only one constructor).
+  - This class participates in inversion of control.
+    It nicely has no idea what kind of repository it is using.
+    - The class is annotated with @Component so that it can be
+      auto-detected in annotation based configuration,
+      becoming controlled by an ApplicationContext container.
+      This makes the BirdPersistence class a "Spring Bean".
+    - The class constructor is annotated with @Autowired
+      so that the member field birdRepository
+      will get set with a nicely instantiated BirdRepository.
+      (Note that per [this Spring documentation](https://docs.spring.io/spring-framework/docs/4.3.x/spring-framework-reference/htmlsingle/#beans-autowired-annotation),
+      @Autowired is not really necessary in this case
+      as there is only one constructor).
   - One of the methods is annotated with @PostConstruct,
     signifying that it is to be called
     after the object has had its dependency injection done,
@@ -144,4 +117,4 @@ The file structure is:
 
 ## After Modularizing
 
-It still works!
+It still
